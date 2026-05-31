@@ -1,0 +1,52 @@
+extends ../layout
+
+block content
+  h1 Nueva Publicación
+  if error
+    .error= error
+  form(method='POST' enctype='multipart/form-data')
+    div
+      label Título:
+      input(type='text' name='titulo' required)
+    div
+      label Descripción (opcional):
+      textarea(name='descripcion')
+    div
+      label Etiquetas (separadas por comas):
+      input(type='text' name='etiquetas' placeholder='naturaleza, paisaje, retrato')
+    div
+      label Imágenes (puede seleccionar múltiples):
+      input(type='file' name='imagenes' accept='image/*' multiple required)
+    div#imagenes-container
+      // Aquí agregaremos dinámicamente selects para licencia y marca de agua por cada imagen
+    button(type='submit') Publicar
+
+  script.
+    const inputImagenes = document.querySelector('input[name="imagenes"]');
+    const container = document.getElementById('imagenes-container');
+    inputImagenes.addEventListener('change', () => {
+      container.innerHTML = '';
+      const files = Array.from(inputImagenes.files);
+      files.forEach((file, index) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <h4>Imagen ${index+1}: ${file.name}</h4>
+          <label>Licencia:</label>
+          <select name="licencias[${index}]" required>
+            <option value="sin_copyright">Sin Copyright</option>
+            <option value="copyright">Con Copyright</option>
+          </select>
+          <div class="marca-agua" style="display:none;">
+            <label>Texto de marca de agua:</label>
+            <input type="text" name="marcas_agua[${index}]" placeholder="Ej: © MiNombre">
+          </div>
+        `;
+        const select = div.querySelector('select');
+        const marcaDiv = div.querySelector('.marca-agua');
+        select.addEventListener('change', (e) => {
+          if (e.target.value === 'copyright') marcaDiv.style.display = 'block';
+          else marcaDiv.style.display = 'none';
+        });
+        container.appendChild(div);
+      });
+    });

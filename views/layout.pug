@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title #{title} | FotoCompartir
+    link(rel='stylesheet' href='/css/style.css')
+  body
+    nav
+      a(href='/') Inicio
+      if usuario
+        span Hola, #{usuario.nombre}
+        a(href='/logout') Cerrar sesión
+      else
+        a(href='/login') Iniciar sesión
+        a(href='/registro') Registrarse
+    main
+      block content

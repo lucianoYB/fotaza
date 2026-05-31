@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+  h1= publicacion.titulo
+  p Por #{publicacion.autor_nombre} - #{publicacion.fecha_creacion.toLocaleDateString()}
+  if publicacion.descripcion
+    p= publicacion.descripcion
+  p Etiquetas: #{etiquetas.join(', ')}
+  
+  each img in imagenes
+    .imagen
+      img(src=img.ruta_archivo alt=publicacion.titulo style='max-width:100%')
+      p Licencia: #{img.licencia === 'copyright' ? '© Copyright' : 'Sin Copyright'}
+      if img.licencia === 'copyright' && img.texto_marca_agua
+        p Marca de agua: #{img.texto_marca_agua}
+      p Valoración promedio: #{img.valoracion_promedio} (#{img.total_valoraciones} votos)
+      // Aquí luego pondremos botón de valorar, comentarios, denuncias
+      
+  a(href='/') Volver al inicio

@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  h1 Bienvenido a la Comunidad de Fotografía
+  if usuario
+    p Has iniciado sesión como #{usuario.nombre}
+    p Próximamente: subir imágenes, comentar, etc.
+  else
+    p Explora las mejores imágenes (pronto contenido público)
+    a(href='/registro') Únete ahora
+
+    extends layout
+
+block content
+  h1 Comunidad de Fotografía
+  if usuario
+    a(href='/crear') Nueva publicación
+  h2 Imágenes destacadas
+  .galeria
+    each img in destacadas
+      .card
+        a(href=`/publicacion/${img.publicacion_id}`)
+          img(src=img.ruta_archivo alt=img.titulo)
+        p= img.titulo
+        p ⭐ #{img.valoracion_promedio} (#{img.total_valoraciones})
+  h2 Otras imágenes
+  .galeria
+    each img in otras
+      .card
+        a(href=`/publicacion/${img.publicacion_id}`)
+          img(src=img.ruta_archivo alt=img.titulo)
+        p= img.titulo
