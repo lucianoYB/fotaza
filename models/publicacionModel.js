@@ -6,7 +6,7 @@ const Publicacion = {
             'INSERT INTO publicacion (titulo, descripcion, usuario_id) VALUES (?, ?, ?)',
             [titulo, descripcion, usuarioId]
         );
-        return result.insertId;
+        return result;
     },
     findById: async (id) => {
         const [rows] = await db.execute(`
@@ -30,6 +30,30 @@ const Publicacion = {
         return rows.map(r => r.nombre);
     },
     // ... más métodos (update, delete, etc.)
+
+
+findByUsuarios: async (usuariosIds, limite = 20) => {
+    if (!usuariosIds.length) return [];
+    const placeholders = usuariosIds.map(() => '?').join(',');
+    const [rows] = await db.execute(`
+        SELECT p.*, u.nombre as autor_nombre
+        FROM publicacion p
+        JOIN usuario u ON p.usuario_id = u.id
+        WHERE p.usuario_id IN (${placeholders})
+        ORDER BY p.fecha_creacion DESC
+        LIMIT ?
+    `, [...usuariosIds, limite]);
+    return rows;
+},
+
+cambiarEstado: async (publicacionId, estado) => {
+    await db.execute('UPDATE publicacion SET estado = ? WHERE id = ?', [estado, publicacionId]);
+}
+
+
+
 };
 
 module.exports = Publicacion;
+
+
