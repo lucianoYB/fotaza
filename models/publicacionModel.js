@@ -17,6 +17,16 @@ const Publicacion = {
         `, [id]);
         return rows[0];
     },
+    findByUsuario: async (usuarioId) => {
+        const [rows] = await db.execute(`
+            SELECT p.*, u.nombre as autor_nombre
+            FROM publicacion p
+            JOIN usuario u ON p.usuario_id = u.id
+            WHERE p.usuario_id = ?
+            ORDER BY p.fecha_creacion DESC
+        `, [usuarioId]);
+        return rows;
+    },
     getImagenesByPublicacion: async (publicacionId) => {
         const [rows] = await db.execute('SELECT * FROM imagen WHERE publicacion_id = ?', [publicacionId]);
         return rows;

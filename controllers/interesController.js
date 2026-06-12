@@ -1,3 +1,4 @@
+const db = require('../config/db');
 const Interes = require('../models/interesModel');
 const Mensaje = require('../models/mensajeModel');
 const Notificacion = require('../models/notificacionModel');
@@ -28,15 +29,25 @@ exports.misInteresesRecibidos = async (req, res) => {
     res.render('intereses/recibidos', { intereses });
 };
 
+exports.misInteresesEnviados = async (req, res) => {
+    const intereses = await Interes.getEnviados(req.session.usuarioId);
+    res.render('intereses/enviados', { intereses });
+};
+
 exports.verChat = async (req, res) => {
     const { interesId } = req.params;
     const usuarioId = req.session.usuarioId;
     // Verificar que el usuario es parte del interés (autor o comprador)
     const [interes] = await db.execute(
-        'SELECT * FROM interes_imagen WHERE id = ? AND (autor_usuario_id = ? OR comprador_usuario_id = ?)',
+        `SELECT i.*, img.ruta_archivo, p.titulo, u.nombre AS comprador_nombre
+         FROM interes_imagen i
+         JOIN imagen img ON i.imagen_id = img.id
+         JOIN publicacion p ON img.publicacion_id = p.id
+         JOIN usuario u ON i.comprador_usuario_id = u.id
+         WHERE i.id = ? AND (i.autor_usuario_id = ? OR i.comprador_usuario_id = ?)`,
         [interesId, usuarioId, usuarioId]
     );
-    if (!interes) return res.status(404).send('No autorizado');
+    if (!interes.length) return res.status(404).send('No autorizado');
     const mensajes = await Mensaje.getConversacion(interesId, usuarioId);
     // Marcar mensajes como leídos
     await Mensaje.marcarLeidos(interesId, usuarioId);
@@ -54,6 +65,11 @@ exports.enviarMensaje = async (req, res) => {
         [interesId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Interés no encontrado' });
+    // Verificar que el remitente forma parte de la conversación
+    const row = rows[0];
+    if (row.autor_usuario_id !== remitenteId && row.comprador_usuario_id !== remitenteId) {
+        return res.status(403).json({ error: 'No autorizado para enviar mensajes en esta conversación' });
+    }
     const destinatarioId = (rows[0].autor_usuario_id === remitenteId) ? rows[0].comprador_usuario_id : rows[0].autor_usuario_id;
     await Mensaje.enviar(interesId, remitenteId, destinatarioId, mensaje);
     // Notificar (opcional) - podríamos crear notificación de nuevo mensaje

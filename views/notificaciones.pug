@@ -2,16 +2,23 @@ extends layout
 
 block content
   h1 Mis Notificaciones
-  button#marcarTodas Marcar todas como leídas
-  ul
-    each notif in notificaciones
-      li(class=notif.leida ? 'leida' : 'no-leida')
-        strong #{notif.origen_nombre} 
-        span 
-          case notif.tipo
-            when 'comentario': | comentó tu publicación.
-            when 'valoracion': | valoró tu imagen.
-            when 'nuevo_seguidor': | comenzó a seguirte.
-        span  - #{new Date(notif.fecha).toLocaleString()}
-        if !notif.leida
-          button.marcar(data-id=notif.id) Marcar como leída
+  if notificaciones.length
+    form(method='post' action='/notificaciones/leer-todas')
+      button(type='submit') Marcar todas como leídas
+    ul
+      each notif in notificaciones
+        li(class=notif.leida ? 'leida' : 'no-leida')
+          strong #{notif.origen_nombre}
+          span
+            case notif.tipo
+              when 'comentario': | comentó tu publicación.
+              when 'valoracion': | valoró tu imagen.
+              when 'me_interesa': | marcó “me interesa” en tu imagen.
+              when 'nuevo_seguidor': | comenzó a seguirte.
+              default: | interactuó con tu contenido.
+          span  - #{new Date(notif.fecha).toLocaleString()}
+          if !notif.leida
+            form(method='post' action=`/notificacion/${notif.id}/leer`)
+              button(type='submit') Marcar como leída
+  else
+    p No tienes notificaciones.

@@ -7,6 +7,7 @@ const notificacionController = require('../controllers/notificacionController');
 
 
 router.post('/seguir/:id', requireLogin, seguimientoController.follow);
+router.post('/seguir/:id/deshacer', requireLogin, seguimientoController.unfollow);
 router.delete('/seguir/:id', requireLogin, seguimientoController.unfollow);
 
 

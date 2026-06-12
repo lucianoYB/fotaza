@@ -22,6 +22,14 @@ const Notificacion = {
         const [rows] = await db.execute(sql, [usuarioId]);
         return rows;
     },
+
+    countUnreadByUsuario: async (usuarioId) => {
+        const [rows] = await db.execute(
+            'SELECT COUNT(*) as total FROM notificacion WHERE usuario_id = ? AND leida = FALSE',
+            [usuarioId]
+        );
+        return rows[0].total;
+    },
     
     marcarLeida: async (notificacionId, usuarioId) => {
         await db.execute(

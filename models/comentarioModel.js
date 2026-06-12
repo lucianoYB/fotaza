@@ -29,16 +29,18 @@ const Comentario = {
         `, [comentarioId, publicacionAutorId]);
         return result.affectedRows > 0;
     },
-    denunciar: async (comentarioId, usuarioId, motivo) => {
-        // Tabla adicional para denuncias de comentarios 
-        // Por ahora solo marcamos el comentario como denunciado 
-        // Pero lo ideal es una tabla separada. Implementaremos tabla denuncia_comentario.
+    marcarDenunciado: async (comentarioId) => {
         await db.execute(
             'UPDATE comentario SET denunciado = TRUE WHERE id = ?',
             [comentarioId]
         );
-        // Guardar registro de denuncia (opcional para historial)
-        // Crearemos tabla denuncia_comentario en la BD.
+    },
+    denunciar: async (comentarioId, usuarioId, motivo, descripcion) => {
+        await db.execute(
+            'INSERT INTO denuncia_comentario (comentario_id, usuario_id, motivo, descripcion) VALUES (?, ?, ?, ?)',
+            [comentarioId, usuarioId, motivo, descripcion]
+        );
+        await Comentario.marcarDenunciado(comentarioId);
     }
 };
 

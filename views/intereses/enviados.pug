@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+  h1 Intereses enviados
+  if intereses.length
+    ul
+      each interes in intereses
+        li
+          h2 #{interes.titulo}
+          p Autor: #{interes.autor_nombre}
+          p Imagen:
+            img(src=interes.ruta_archivo alt=interes.titulo style='max-width:200px')
+          a(href=`/intereses/chat/${interes.id}`) Abrir chat
+  else
+    p No has enviado intereses aún.

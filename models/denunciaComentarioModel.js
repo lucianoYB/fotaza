@@ -1,14 +1,26 @@
 const db = require('../config/db');
 
 const DenunciaComentario = {
+    ensureTable: async () => {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS denuncia_comentario (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                comentario_id INT NOT NULL,
+                usuario_id INT NOT NULL,
+                motivo TEXT NOT NULL,
+                descripcion TEXT,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (comentario_id) REFERENCES comentario(id) ON DELETE CASCADE,
+                FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB;
+        `);
+    },
     create: async (comentarioId, usuarioId, motivo, descripcion) => {
-        // Marcar el comentario como denunciado.
+        await DenunciaComentario.ensureTable();
         await db.execute(
-            'UPDATE comentario SET denunciado = TRUE WHERE id = ?',
-            [comentarioId]
+            'INSERT INTO denuncia_comentario (comentario_id, usuario_id, motivo, descripcion) VALUES (?, ?, ?, ?)',
+            [comentarioId, usuarioId, motivo, descripcion]
         );
-        // Historial de denuncias de comentarios no implementado en la BD actual.
-        // Si se crea una tabla denuncia_comentario en el futuro, se puede guardar allí.
     }
 };
 

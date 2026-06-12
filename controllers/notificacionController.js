@@ -8,10 +8,16 @@ exports.misNotificaciones = async (req, res) => {
 exports.marcarLeida = async (req, res) => {
     const { id } = req.params;
     await Notificacion.marcarLeida(id, req.session.usuarioId);
-    res.json({ success: true });
+    if (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+        return res.json({ success: true });
+    }
+    res.redirect('/notificaciones');
 };
 
 exports.marcarTodasLeidas = async (req, res) => {
     await Notificacion.marcarTodasLeidas(req.session.usuarioId);
-    res.json({ success: true });
+    if (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1) {
+        return res.json({ success: true });
+    }
+    res.redirect('/notificaciones');
 };

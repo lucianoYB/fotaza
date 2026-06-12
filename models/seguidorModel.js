@@ -4,6 +4,9 @@ const Seguidor = {
     
     follow: async (seguidorId, seguidoId) => {
         if (seguidorId === seguidoId) throw new Error('No puedes seguirte a ti mismo');
+        // Evitar duplicados a nivel de aplicación
+        const [r] = await db.execute('SELECT 1 FROM seguidor WHERE seguidor_id = ? AND seguido_id = ?', [seguidorId, seguidoId]);
+        if (r.length > 0) throw new Error('Ya sigues a este usuario');
         await db.execute(
             'INSERT INTO seguidor (seguidor_id, seguido_id) VALUES (?, ?)',
             [seguidorId, seguidoId]

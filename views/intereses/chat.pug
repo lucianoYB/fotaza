@@ -1,0 +1,47 @@
+extends ../layout
+
+block content
+  h1 Chat de interés
+  if interes
+    p Interés para imagen: #{interes.titulo}
+    p Comprador: #{interes.comprador_nombre}
+    p Imagen:
+      img(src=interes.ruta_archivo alt=interes.titulo style='max-width:200px')
+  if mensajes.length
+    ul
+      each msg in mensajes
+        li
+          strong #{msg.remitente_nombre}: 
+          span #{msg.mensaje}
+  else
+    p No hay mensajes aún.
+
+  form#mensajeForm
+    textarea(name='mensaje' placeholder='Escribe tu mensaje...')
+    button(type='submit') Enviar mensaje
+
+  a(href='/intereses/recibidos') Volver a intereses
+
+  script.
+    document.getElementById('mensajeForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const mensaje = this.querySelector('textarea[name="mensaje"]').value.trim();
+      if (!mensaje) return alert('Escribe un mensaje.');
+      try {
+        const res = await fetch(`/intereses/chat/${#{interes.id}}/mensaje`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ mensaje })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Error al enviar mensaje');
+          return;
+        }
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('Error de red al enviar mensaje');
+      }
+    });

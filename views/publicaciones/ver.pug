@@ -2,7 +2,10 @@ extends ../layout
 
 block content
   h1= publicacion.titulo
-  p Por #{publicacion.autor_nombre} - #{publicacion.fecha_creacion.toLocaleDateString()}
+  p
+    | Por
+    a(href=`/usuario/${publicacion.usuario_id}`) #{publicacion.autor_nombre}
+    |  - #{publicacion.fecha_creacion.toLocaleDateString()}
   if publicacion.descripcion
     p= publicacion.descripcion
   p Etiquetas: #{etiquetas.join(', ')}
@@ -26,6 +29,9 @@ block content
             option(value='3') 3
             option(value='4') 4
             option(value='5') 5
+      if usuario && usuario.id !== publicacion.usuario_id
+        .interes
+          button.me-interesa(data-id=img.id) Me interesa
       .denuncia
         if usuario && usuario.id !== publicacion.usuario_id
           button.denunciar-imagen(data-id=img.id) Denunciar imagen
@@ -46,10 +52,12 @@ block content
             .comentario
               strong #{comentario.autor_nombre}: 
               span #{comentario.texto}
-              if usuario && usuario.id === publicacion.usuario_id && comentario.denunciado
-                button.eliminar-comentario(data-id=comentario.id) Eliminar (denunciado)
-              else if usuario && usuario.id !== comentario.usuario_id
+              if usuario && usuario.id !== comentario.usuario_id
                 button.denunciar-comentario(data-id=comentario.id) Denunciar
+                .form-denuncia-comentario(style='display:none')
+                  textarea(placeholder='Motivo de denuncia' required)
+                  textarea(placeholder='Descripción (opcional)')
+                  button.confirmar-denuncia-comentario(type='button') Confirmar
 
   .guardar
     input(type='hidden' id='publicacionId' value=publicacion.id)
@@ -199,6 +207,134 @@ block content
           }
         });
       }
+
+      const interesButtons = document.querySelectorAll('button.me-interesa');
+      interesButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+          const imagenId = button.dataset.id;
+          try {
+            const res = await fetch(`/intereses/imagen/${imagenId}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin'
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al manifestar interés');
+              return;
+            }
+            alert('Tu interés fue enviado al autor. Ahora pueden contactarse por mensajería privada.');
+            button.disabled = true;
+            button.textContent = 'Interés enviado';
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al enviar interés');
+          }
+        });
+      });
+
+      const denunciaButtons = document.querySelectorAll('button.denunciar-imagen');
+      denunciaButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const imagenBlock = button.closest('.imagen');
+          const form = imagenBlock ? imagenBlock.querySelector('.form-denuncia') : null;
+          if (form) {
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+          }
+        });
+      });
+
+      const confirmarDenunciaButtons = document.querySelectorAll('button.confirmar-denuncia');
+      confirmarDenunciaButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+          const imagenBlock = button.closest('.imagen');
+          if (!imagenBlock) return;
+          const imagenId = imagenBlock.dataset.imagenId;
+          const motivoTextarea = imagenBlock.querySelector('.form-denuncia textarea[placeholder="Motivo de denuncia"]');
+          const descripcionTextarea = imagenBlock.querySelector('.form-denuncia textarea[placeholder="Descripción (opcional)"]');
+          const motivo = motivoTextarea ? motivoTextarea.value.trim() : '';
+          const descripcion = descripcionTextarea ? descripcionTextarea.value.trim() : '';
+
+          if (!motivo) {
+            alert('Ingresa el motivo de la denuncia.');
+            return;
+          }
+
+          try {
+            const res = await fetch(`/api/imagen/${imagenId}/denunciar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ motivo, descripcion })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al denunciar la imagen');
+              return;
+            }
+            alert('Denuncia enviada con éxito.');
+            if (motivoTextarea) motivoTextarea.value = '';
+            if (descripcionTextarea) descripcionTextarea.value = '';
+            const form = imagenBlock.querySelector('.form-denuncia');
+            if (form) form.style.display = 'none';
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al enviar la denuncia');
+          }
+        });
+      });
+
+      const denunciaComentarioButtons = document.querySelectorAll('button.denunciar-comentario');
+      denunciaComentarioButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const comentarioBlock = button.closest('.comentario');
+          const form = comentarioBlock ? comentarioBlock.querySelector('.form-denuncia-comentario') : null;
+          if (form) {
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+          }
+        });
+      });
+
+      const confirmarDenunciaComentarioButtons = document.querySelectorAll('button.confirmar-denuncia-comentario');
+      confirmarDenunciaComentarioButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+          const comentarioBlock = button.closest('.comentario');
+          if (!comentarioBlock) return;
+          const comentarioId = comentarioBlock.querySelector('button.denunciar-comentario')?.dataset.id;
+          const motivoTextarea = comentarioBlock.querySelector('.form-denuncia-comentario textarea[placeholder="Motivo de denuncia"]');
+          const descripcionTextarea = comentarioBlock.querySelector('.form-denuncia-comentario textarea[placeholder="Descripción (opcional)"]');
+          const motivo = motivoTextarea ? motivoTextarea.value.trim() : '';
+          const descripcion = descripcionTextarea ? descripcionTextarea.value.trim() : '';
+
+          if (!comentarioId) return;
+          if (!motivo) {
+            alert('Ingresa el motivo de la denuncia.');
+            return;
+          }
+
+          try {
+            const res = await fetch(`/api/comentario/${comentarioId}/denunciar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ motivo, descripcion })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al denunciar el comentario');
+              return;
+            }
+            alert('Denuncia enviada con éxito.');
+            if (motivoTextarea) motivoTextarea.value = '';
+            if (descripcionTextarea) descripcionTextarea.value = '';
+            const form = comentarioBlock.querySelector('.form-denuncia-comentario');
+            if (form) form.style.display = 'none';
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al enviar la denuncia');
+          }
+        });
+      });
     })();
 
   

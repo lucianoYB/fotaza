@@ -8,8 +8,12 @@ html
   body
     nav
       a(href='/') Inicio
+      a(href='/buscar') Buscar
       if usuario
         a(href='/colecciones') Mis colecciones
+        a(href='/intereses/recibidos') Intereses
+        a(href='/intereses/enviados') Mis intereses
+        a(href='/notificaciones') Notificaciones#{unreadNotifications && unreadNotifications > 0 ? ` (${unreadNotifications})` : ''}
         span Hola, #{usuario.nombre}
         a(href='/logout') Cerrar sesión
       else
@@ -17,3 +21,10 @@ html
         a(href='/registro') Registrarse
     main
       block content
+    // expose current user to client-side scripts
+    if usuario
+      script.
+        window.usuario = { id: #{usuario.id}, nombre: "#{usuario.nombre}" };
+    else
+      script.
+        window.usuario = null;

@@ -19,6 +19,9 @@ block content
         a(href=`/publicacion/${img.publicacion_id}`)
           img(src=img.ruta_archivo alt=img.titulo)
         p= img.titulo
+        p
+          | Por
+          a(href=`/usuario/${img.usuario_id}`) #{img.autor_nombre}
         p ⭐ #{img.valoracion_promedio} (#{img.total_valoraciones})
 
   h2 Otras imágenes
@@ -28,3 +31,6 @@ block content
         a(href=`/publicacion/${img.publicacion_id}`)
           img(src=img.ruta_archivo alt=img.titulo)
         p= img.titulo
+        p
+          | Por
+          a(href=`/usuario/${img.usuario_id}`) #{img.autor_nombre}

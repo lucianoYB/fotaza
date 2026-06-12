@@ -31,6 +31,20 @@ const Interes = {
         `, [autorId]);
         return rows;
     }
+    ,
+    // Obtener intereses enviados por un comprador
+    getEnviados: async (compradorId) => {
+        const [rows] = await db.execute(`
+            SELECT i.*, u.nombre as autor_nombre, img.ruta_archivo, p.titulo
+            FROM interes_imagen i
+            JOIN usuario u ON i.autor_usuario_id = u.id
+            JOIN imagen img ON i.imagen_id = img.id
+            JOIN publicacion p ON img.publicacion_id = p.id
+            WHERE i.comprador_usuario_id = ?
+            ORDER BY i.fecha DESC
+        `, [compradorId]);
+        return rows;
+    }
 };
 
 module.exports = Interes;

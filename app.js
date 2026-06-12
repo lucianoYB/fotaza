@@ -54,6 +54,10 @@ app.use('/colecciones', requireLogin, coleccionRoutes);
 const interesRoutes = require('./routes/interesRoutes');
 app.use('/intereses', requireLogin, interesRoutes);
 
+// Búsqueda avanzada
+const searchRoutes = require('./routes/searchRoutes');
+app.use('/buscar', searchRoutes);
+
 const homeController = require('./controllers/homeController');
 app.get('/', homeController.home);
 

@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+  h1 Intereses recibidos
+  if intereses.length
+    ul
+      each interes in intereses
+        li
+          h2 #{interes.titulo}
+          p Comprador: #{interes.comprador_nombre}
+          p Imagen: #{interes.ruta_archivo}
+          a(href=`/intereses/chat/${interes.id}`) Abrir chat
+  else
+    p No tienes intereses recibidos por ahora.

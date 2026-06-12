@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  h1 Buscar publicaciones
+  form(method='get' action='/buscar')
+    input(type='text' name='q' placeholder='Palabra clave' value=(params && params.q) || '')
+    input(type='text' name='tags' placeholder='Etiquetas (separadas por comas)' value=(params && params.tags) || '')
+    input(type='text' name='author' placeholder='Autor' value=(params && params.author) || '')
+    select(name='licencia')
+      option(value='') Todas las licencias
+      option(value='copyright' selected=(params && params.licencia==='copyright')) Copyright
+      option(value='sin_copyright' selected=(params && params.licencia==='sin_copyright')) Sin copyright
+    input(type='number' step='0.1' name='minRating' placeholder='Valoración mínima' value=(params && params.minRating) || '')
+    input(type='date' name='fromDate' value=(params && params.fromDate) || '')
+    input(type='date' name='toDate' value=(params && params.toDate) || '')
+    button(type='submit') Buscar
+
+  if results && results.length
+    h2 Resultados
+    ul
+      each r in results
+        li
+          a(href=`/publicacion/${r.publicacion_id}`)
+            if r.ruta_archivo
+              img(src=r.ruta_archivo alt=r.titulo style='max-width:150px')
+            h3 #{r.titulo}
+          p
+            | Autor:
+            a(href=`/usuario/${r.autor_id}`) #{r.autor_nombre}
+          if r.etiquetas
+            p Etiquetas: #{r.etiquetas}
+          if r.valoracion_promedio
+            p Valoración: #{r.valoracion_promedio}
+  else
+    p No se encontraron resultados.
