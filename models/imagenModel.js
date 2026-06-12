@@ -30,52 +30,55 @@ const Imagen = {
 };
 
 Imagen.getHomeImages = async (limite = 20) => {
-  
-    const [destacadasCount] = await db.execute(
-        `SELECT COUNT(*) as total FROM imagen 
-         WHERE valoracion_promedio >= 4 AND total_valoraciones >= 10`
-    );
-    const totalDestacadas = destacadasCount[0].total;
-    const desiredDestacadas = Math.floor(limite * 0.7);
-    const takeDestacadas = Math.min(desiredDestacadas, totalDestacadas);
-    const takeOtras = limite - takeDestacadas;
-
-    let resultados = [];
-
-    if (takeDestacadas > 0) {
-        const [destacadas] = await db.execute(
-            `SELECT i.*, p.titulo, p.usuario_id, u.nombre as autor_nombre
-             FROM imagen i
-             JOIN publicacion p ON i.publicacion_id = p.id
-             JOIN usuario u ON p.usuario_id = u.id
-             WHERE i.valoracion_promedio >= 4 AND i.total_valoraciones >= 10
-               AND p.estado = 'activa'
-             ORDER BY i.valoracion_promedio DESC, i.total_valoraciones DESC
-             LIMIT ?`, [takeDestacadas]
+    try {
+        const [destacadasCount] = await db.execute(
+            `SELECT COUNT(*) as total FROM imagen 
+             WHERE valoracion_promedio >= 4 AND total_valoraciones >= 10`
         );
-        resultados.push(...destacadas);
-    }
+        const totalDestacadas = destacadasCount[0].total;
+        const desiredDestacadas = Math.floor(limite * 0.7);
+        const takeDestacadas = Math.min(desiredDestacadas, totalDestacadas);
+        const takeOtras = limite - takeDestacadas;
 
-    if (takeOtras > 0) {
-        
-        const idsSeleccionadas = resultados.map(r => r.id);
-        let sqlOtras = `
-            SELECT i.*, p.titulo, p.usuario_id, u.nombre as autor_nombre
-            FROM imagen i
-            JOIN publicacion p ON i.publicacion_id = p.id
-            JOIN usuario u ON p.usuario_id = u.id
-            WHERE p.estado = 'activa'
-        `;
-        if (idsSeleccionadas.length) {
-            sqlOtras += ` AND i.id NOT IN (${idsSeleccionadas.map(() => '?').join(',')})`;
+        let resultados = [];
+
+        if (takeDestacadas > 0) {
+            const [destacadas] = await db.execute(
+                `SELECT i.*, p.titulo, p.usuario_id, u.nombre as autor_nombre
+                 FROM imagen i
+                 JOIN publicacion p ON i.publicacion_id = p.id
+                 JOIN usuario u ON p.usuario_id = u.id
+                 WHERE i.valoracion_promedio >= 4 AND i.total_valoraciones >= 10
+                   AND p.estado = 'activa'
+                 ORDER BY i.valoracion_promedio DESC, i.total_valoraciones DESC
+                 LIMIT ?`, [takeDestacadas]
+            );
+            resultados.push(...destacadas);
         }
-        sqlOtras += ` ORDER BY RAND() LIMIT ?`;
-        const params = idsSeleccionadas.length ? [...idsSeleccionadas, takeOtras] : [takeOtras];
-        const [otras] = await db.execute(sqlOtras, params);
-        resultados.push(...otras);
-    }
 
-    return resultados;
+        if (takeOtras > 0) {
+            const idsSeleccionadas = resultados.map(r => r.id);
+            let sqlOtras = `
+                SELECT i.*, p.titulo, p.usuario_id, u.nombre as autor_nombre
+                FROM imagen i
+                JOIN publicacion p ON i.publicacion_id = p.id
+                JOIN usuario u ON p.usuario_id = u.id
+                WHERE p.estado = 'activa'
+            `;
+            if (idsSeleccionadas.length) {
+                sqlOtras += ` AND i.id NOT IN (${idsSeleccionadas.map(() => '?').join(',')})`;
+            }
+            sqlOtras += ` ORDER BY RAND() LIMIT ?`;
+            const params = idsSeleccionadas.length ? [...idsSeleccionadas, takeOtras] : [takeOtras];
+            const [otras] = await db.execute(sqlOtras, params);
+            resultados.push(...otras);
+        }
+
+        return resultados;
+    } catch (err) {
+        console.error('Error en Imagen.getHomeImages:', err);
+        return [];
+    }
 }
 
 module.exports = Imagen;

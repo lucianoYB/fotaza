@@ -5,6 +5,8 @@ block content
   - var otras = Array.isArray(otras) ? otras : []
 
   h1 Comunidad de Fotografía
+  if error
+    .error= error
   if usuario
     p Has iniciado sesión como #{usuario.nombre}
     a(href='/publicacion/crear') Nueva publicación
