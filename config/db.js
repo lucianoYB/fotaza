@@ -2,9 +2,15 @@ const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 dotenv.config();
 
-let connectHost = (process.env.DB_HOST || '127.0.0.1').trim();
-if (connectHost === 'localhost' || connectHost === '::1') {
+const rawHost = process.env.DB_HOST ? process.env.DB_HOST.trim() : '';
+let connectHost;
+if (!rawHost) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('DB_HOST no está configurado en el entorno de producción');
+    }
     connectHost = '127.0.0.1';
+} else {
+    connectHost = rawHost === 'localhost' || rawHost === '::1' ? '127.0.0.1' : rawHost;
 }
 
 if (process.env.NODE_ENV !== 'production') {
