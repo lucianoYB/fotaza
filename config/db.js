@@ -2,7 +2,10 @@ const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const connectHost = process.env.DB_HOST === 'localhost' ? '::1' : process.env.DB_HOST || '127.0.0.1';
+let connectHost = (process.env.DB_HOST || '127.0.0.1').trim();
+if (connectHost === 'localhost' || connectHost === '::1') {
+    connectHost = '127.0.0.1';
+}
 
 if (process.env.NODE_ENV !== 'production') {
     console.log(`MySQL host configured as: ${connectHost}`);
