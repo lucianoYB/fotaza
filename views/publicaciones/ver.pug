@@ -7,13 +7,198 @@ block content
     p= publicacion.descripcion
   p Etiquetas: #{etiquetas.join(', ')}
   
+  a(href='/') Volver al inicio
+
   each img in imagenes
-    .imagen
+    .imagen(data-imagen-id=img.id)
       img(src=img.ruta_archivo alt=publicacion.titulo style='max-width:100%')
       p Licencia: #{img.licencia === 'copyright' ? '© Copyright' : 'Sin Copyright'}
       if img.licencia === 'copyright' && img.texto_marca_agua
         p Marca de agua: #{img.texto_marca_agua}
       p Valoración promedio: #{img.valoracion_promedio} (#{img.total_valoraciones} votos)
-      // Aquí luego pondremos botón de valorar, comentarios, denuncias
-      
-  a(href='/') Volver al inicio
+      .valoracion
+        span(data-id="v_#{img.id}") ⭐ #{img.valoracion_promedio} (#{img.total_valoraciones} votos)
+        if usuario && usuario.id !== publicacion.usuario_id
+          select.votar(data-id=img.id)
+            option(value='') Votar...
+            option(value='1') 1 estrella
+            option(value='2') 2
+            option(value='3') 3
+            option(value='4') 4
+            option(value='5') 5
+      .denuncia
+        if usuario && usuario.id !== publicacion.usuario_id
+          button.denunciar-imagen(data-id=img.id) Denunciar imagen
+          .form-denuncia(style='display:none')
+            textarea(placeholder='Motivo de denuncia' required)
+            textarea(placeholder='Descripción (opcional)')
+            button.confirmar-denuncia Confirmar
+      .comentarios
+        h4 Comentarios
+        if publicacion.comentarios_abiertos && usuario
+          form.agregar-comentario(data-imagen=img.id)
+            textarea(name='texto' required placeholder='Escribe un comentario...')
+            button(type='submit') Comentar
+        else if !publicacion.comentarios_abiertos
+          p Los comentarios están cerrados.
+        .lista-comentarios(data-imagen=img.id)
+          each comentario in comentariosPorImagen[img.id] || []
+            .comentario
+              strong #{comentario.autor_nombre}: 
+              span #{comentario.texto}
+              if usuario && usuario.id === publicacion.usuario_id && comentario.denunciado
+                button.eliminar-comentario(data-id=comentario.id) Eliminar (denunciado)
+              else if usuario && usuario.id !== comentario.usuario_id
+                button.denunciar-comentario(data-id=comentario.id) Denunciar
+
+  .guardar
+    input(type='hidden' id='publicacionId' value=publicacion.id)
+    select#coleccionSelect
+      option(value='') Guardar en...
+      each col in colecciones
+        option(value=col.id)= col.nombre
+    button#guardarBtn(type='button') Guardar
+    button#nuevaColeccionBtn(type='button') Nueva colección
+    .nueva-coleccion(style='display:none')
+      input(type='text' id='nuevaColeccionNombre' placeholder='Nombre de la colección')
+      button#crearColeccionBtn(type='button') Crear
+
+  // client voting and commenting script
+  script.
+    (function(){
+      const selects = document.querySelectorAll('select.votar');
+      selects.forEach(s => {
+        s.addEventListener('change', async (e) => {
+          const val = e.target.value;
+          const id = e.target.dataset.id;
+          if (!val) return;
+          try {
+            const res = await fetch(`/api/imagen/${id}/valorar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ puntaje: val })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al valorar');
+              return;
+            }
+            const valoracionSpan = document.querySelector(`.valoracion span[data-id="v_${id}"]`);
+            if (valoracionSpan) {
+              valoracionSpan.textContent = `⭐ ${data.promedio} (${data.total} votos)`;
+            }
+            e.target.value = '';
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al enviar valoración');
+          }
+        });
+      });
+
+      const commentForms = document.querySelectorAll('form.agregar-comentario');
+      commentForms.forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const imagenId = form.dataset.imagen;
+          const textarea = form.querySelector('textarea[name="texto"]');
+          const texto = textarea ? textarea.value.trim() : '';
+          if (!texto) {
+            alert('El comentario no puede estar vacío.');
+            return;
+          }
+          try {
+            const res = await fetch(`/api/imagen/${imagenId}/comentar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ texto })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al enviar el comentario');
+              return;
+            }
+            const lista = form.parentElement.querySelector(`.lista-comentarios[data-imagen="${imagenId}"]`);
+            if (lista) {
+              const nuevo = document.createElement('div');
+              nuevo.className = 'comentario';
+              nuevo.innerHTML = `<strong>Tú:</strong> <span>${texto}</span>`;
+              lista.appendChild(nuevo);
+            }
+            textarea.value = '';
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al enviar el comentario');
+          }
+        });
+      });
+
+      const guardarBtn = document.getElementById('guardarBtn');
+      if (guardarBtn) {
+        guardarBtn.addEventListener('click', async () => {
+          const select = document.getElementById('coleccionSelect');
+          const coleccionId = select ? select.value : '';
+          const publicacionId = document.getElementById('publicacionId') ? document.getElementById('publicacionId').value : '';
+          if (!coleccionId) {
+            alert('Selecciona una colección primero.');
+            return;
+          }
+          try {
+            const res = await fetch('/colecciones/guardar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ coleccionId, publicacionId })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al guardar la publicación');
+              return;
+            }
+            alert('Publicación guardada en la colección.');
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al guardar la publicación');
+          }
+        });
+      }
+
+      const nuevaColeccionBtn = document.getElementById('nuevaColeccionBtn');
+      const nuevaColeccionDiv = document.querySelector('.nueva-coleccion');
+      const crearColeccionBtn = document.getElementById('crearColeccionBtn');
+      if (nuevaColeccionBtn && nuevaColeccionDiv) {
+        nuevaColeccionBtn.addEventListener('click', () => {
+          nuevaColeccionDiv.style.display = 'block';
+        });
+      }
+      if (crearColeccionBtn) {
+        crearColeccionBtn.addEventListener('click', async () => {
+          const nombreInput = document.getElementById('nuevaColeccionNombre');
+          const nombre = nombreInput ? nombreInput.value.trim() : '';
+          if (!nombre) {
+            alert('Ingresa el nombre de la colección.');
+            return;
+          }
+          try {
+            const res = await fetch('/colecciones', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ nombre })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert(data.error || 'Error al crear colección');
+              return;
+            }
+            alert('Colección creada. Recarga la página para usarla.');
+          } catch (err) {
+            console.error(err);
+            alert('Error de red al crear colección');
+          }
+        });
+      }
+    })();
+
+  

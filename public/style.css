@@ -1,0 +1,331 @@
+/* ==========================================
+   Variables globales
+   ========================================== */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --secondary: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --light: #f8fafc;
+  --dark: #1e293b;
+  --gray: #94a3b8;
+  --border: #e2e8f0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+  --radius: 0.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: #f1f5f9;
+  color: var(--dark);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================
+   Navegación
+   ========================================== */
+nav {
+  background: white;
+  box-shadow: var(--shadow);
+  padding: 1rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+nav a {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+nav a:hover {
+  background: var(--light);
+  color: var(--primary);
+}
+
+nav .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+nav .user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+/* ==========================================
+   Contenido principal
+   ========================================== */
+main {
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  flex: 1;
+}
+
+h1, h2, h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h1 { font-size: 2rem; color: var(--dark); }
+h2 { font-size: 1.5rem; border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+h3 { font-size: 1.25rem; }
+
+/* ==========================================
+   Galería (grid de imágenes)
+   ========================================== */
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+
+.card:hover img {
+  transform: scale(1.02);
+}
+
+.card .card-content {
+  padding: 1rem;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.card p {
+  color: var(--secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.card .rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+/* ==========================================
+   Formularios
+   ========================================== */
+form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+form input, form textarea, form select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  transition: border 0.2s;
+}
+
+form input:focus, form textarea:focus, form select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+button, .btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+button:hover, .btn:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+}
+
+.btn-danger {
+  background: var(--danger);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+/* ==========================================
+   Notificaciones y badges
+   ========================================== */
+.notificacion {
+  background: white;
+  border-left: 4px solid var(--primary);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.notificacion.no-leida {
+  background: #eff6ff;
+  border-left-color: var(--primary);
+}
+
+.notificacion .fecha {
+  font-size: 0.75rem;
+  color: var(--gray);
+}
+
+.badge {
+  background: var(--danger);
+  color: white;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* ==========================================
+   Perfil y contadores
+   ========================================== */
+.perfil-header {
+  background: white;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.perfil-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--secondary);
+}
+
+/* ==========================================
+   Comentarios
+   ========================================== */
+.comentarios {
+  background: white;
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.comentario {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.comentario strong {
+  color: var(--primary);
+}
+
+/* ==========================================
+   Footer
+   ========================================== */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  background: white;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    text-align: center;
+  }
+  nav .user-info {
+    margin-left: 0;
+  }
+  .galeria {
+    grid-template-columns: 1fr;
+  }
+  main {
+    padding: 0 1rem;
+  }
+}

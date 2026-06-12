@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  h1 Mis colecciones
+  button#nuevaColeccion Nueva colección
+  .colecciones
+    each col in colecciones
+      .coleccion
+        h3= col.nombre
+        a(href=`/colecciones/${col.id}`) Ver contenido
+        button.eliminar(data-id=col.id) Eliminar
+  script.
+    document.getElementById('nuevaColeccion').onclick = () => {
+      const nombre = prompt('Nombre de la colección:');
+      if(nombre) fetch('/coleccion', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nombre})})
+        .then(()=>location.reload());
+    };

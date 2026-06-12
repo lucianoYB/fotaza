@@ -6,6 +6,8 @@ const upload = require('../middlewares/upload');
 const { applyWatermark } = require('../utils/watermark');
 const path = require('path');
 const fs = require('fs');
+const db = require('../config/db');
+const Coleccion = require('../models/coleccionModel');
 
 // Mostrar formulario de creación
 exports.formCrear = (req, res) => {
@@ -82,7 +84,8 @@ exports.ver = async (req, res) => {
             comentariosPorImagen[img.id] = await Comentario.findByImagen(img.id);
         }
 
-        res.render('publicaciones/ver', { publicacion, imagenes, etiquetas, comentariosPorImagen });
+        const colecciones = req.session.usuarioId ? await Coleccion.getByUsuario(req.session.usuarioId) : [];
+        res.render('publicaciones/ver', { publicacion, imagenes, etiquetas, comentariosPorImagen, colecciones });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error interno');
@@ -117,4 +120,3 @@ exports.home = async (req, res) => {
         res.render('index', { destacadas: [], otras: [] });
     }
 };
-

@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1 Perfil de #{perfil.nombre}
+  p Email: #{perfil.email}
+  p Seguidores: #{seguidores} | Siguiendo: #{seguidos}
+  if !esMiPerfil && usuario
+    if yaSigo
+      button#unfollow(data-id=perfil.id) Dejar de seguir
+    else
+      button#follow(data-id=perfil.id) Seguir
+  h2 Publicaciones
+  each pub in publicaciones
+    .publicacion
+      h3= pub.titulo
+      a(href=`/publicacion/${pub.id}`) Ver

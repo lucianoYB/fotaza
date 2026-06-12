@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1 Publicaciones de usuarios que sigo
+  each pub in publicaciones
+    .card
+      h3= pub.titulo
+      p Por #{pub.autor_nombre}
+      a(href=`/publicacion/${pub.id}`) Ver más
+  if publicaciones.length === 0
+    p Aún no sigues a nadie o no hay publicaciones.

@@ -26,6 +26,7 @@ const fileFilter = (req, file, cb) => {
     else cb(new Error('Solo se permiten imágenes'));
 };
 
-const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB max
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB max
+const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_FILE_SIZE } });
 
 module.exports = upload;

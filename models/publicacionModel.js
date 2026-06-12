@@ -6,7 +6,7 @@ const Publicacion = {
             'INSERT INTO publicacion (titulo, descripcion, usuario_id) VALUES (?, ?, ?)',
             [titulo, descripcion, usuarioId]
         );
-        return result;
+        return result.insertId;
     },
     findById: async (id) => {
         const [rows] = await db.execute(`

@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 Comunidad de Fotografía
+  .galeria
+    each img in imagenes
+      .card
+        img(src=img.ruta_archivo alt=img.titulo style='max-width:100%')
+        h3= img.titulo
+        p Por #{img.autor_nombre}
+        p ⭐ #{img.valoracion_promedio} (#{img.total_valoraciones} votos)
+        a(href=`/publicacion/${img.publicacion_id}`) Ver publicación

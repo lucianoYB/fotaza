@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1 Mis Notificaciones
+  button#marcarTodas Marcar todas como leídas
+  ul
+    each notif in notificaciones
+      li(class=notif.leida ? 'leida' : 'no-leida')
+        strong #{notif.origen_nombre} 
+        span 
+          case notif.tipo
+            when 'comentario': | comentó tu publicación.
+            when 'valoracion': | valoró tu imagen.
+            when 'nuevo_seguidor': | comenzó a seguirte.
+        span  - #{new Date(notif.fecha).toLocaleString()}
+        if !notif.leida
+          button.marcar(data-id=notif.id) Marcar como leída

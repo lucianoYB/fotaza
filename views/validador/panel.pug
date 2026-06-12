@@ -1,0 +1,28 @@
+extends ../layout
+
+block content
+  h1 Panel de Validador
+  if publicaciones.length === 0
+    p No hay publicaciones pendientes.
+  else
+    each pub in publicaciones
+      .card
+        h2 Publicación ID: #{pub.publicacion_id} (Autor ID: #{pub.autor_id})
+        each img in pub.imagenes
+          div
+            p Imagen ID: #{img.imagen_id} - Denuncias: #{img.denuncias_count}
+            ul
+              each den in img.denuncias
+                li Denunciante: #{den.denunciante_nombre} - Motivo: #{den.motivo}
+        div
+          button.aprobar(data-pub=pub.publicacion_id) Dar de baja publicación
+          button.desestimar(data-pub=pub.publicacion_id) Desestimar denuncias
+  script.
+    document.querySelectorAll('.aprobar').forEach(btn => {
+      btn.onclick = async () => {
+        if(confirm('¿Dar de baja esta publicación? El autor sumará una infracción.')) {
+          const res = await fetch(`/validador/publicacion/${btn.dataset.pub}/baja`, {method:'POST'});
+          if(res.ok) location.reload();
+        }
+      };
+    });

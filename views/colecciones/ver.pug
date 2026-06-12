@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+  h1 Colección: #{coleccion.nombre}
+  a(href='/colecciones') ← Volver
+  each pub in publicaciones
+    .card
+      h3= pub.titulo
+      a(href=`/publicacion/${pub.id}`) Ver publicación
+      button.quitar(data-coleccion=coleccion.id data-pub=pub.id) Quitar de colección

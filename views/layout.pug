@@ -4,11 +4,12 @@ html
     meta(charset='UTF-8')
     meta(name='viewport' content='width=device-width, initial-scale=1.0')
     title #{title} | FotoCompartir
-    link(rel='stylesheet' href='/css/style.css')
+    link(rel='stylesheet' href='/style.css')
   body
     nav
       a(href='/') Inicio
       if usuario
+        a(href='/colecciones') Mis colecciones
         span Hola, #{usuario.nombre}
         a(href='/logout') Cerrar sesión
       else
