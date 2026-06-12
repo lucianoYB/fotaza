@@ -14,6 +14,11 @@ const Usuario = {
     return rows[0];
   },
 
+  findByNombre: async (nombre) => {
+    const [rows] = await db.execute('SELECT * FROM usuario WHERE nombre = ?', [nombre]);
+    return rows[0];
+  },
+
   // incluir publicaciones_bajadas en la misma findById
   findById: async (id) => {
     const [rows] = await db.execute(

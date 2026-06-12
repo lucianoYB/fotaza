@@ -23,10 +23,14 @@ const authController = {
         }
 
         try {
-            // Verificar si el email ya existe
-            const existe = await Usuario.findByEmail(email);
-            if (existe) {
+            // Verificar si el email o el nombre ya existen
+            const existeEmail = await Usuario.findByEmail(email);
+            if (existeEmail) {
                 return res.render('registro', { error: 'El email ya está registrado' });
+            }
+            const existeNombre = await Usuario.findByNombre(nombre);
+            if (existeNombre) {
+                return res.render('registro', { error: 'El nombre de usuario ya está en uso' });
             }
 
             // Hashear contraseña
@@ -38,7 +42,11 @@ const authController = {
             req.session.usuario = { id: nuevoId, nombre, email, rol: 'usuario' };
             res.redirect('/');
         } catch (err) {
-            console.error(err);
+            console.error('Registro error:', err);
+            const isDup = err.code === 'ER_DUP_ENTRY' || (err.message && err.message.includes('Duplicate'));
+            if (isDup) {
+                return res.render('registro', { error: 'El nombre o email ya está registrado' });
+            }
             res.render('registro', { error: 'Error del servidor, intente más tarde' });
         }
     },
