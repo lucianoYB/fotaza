@@ -79,6 +79,23 @@ app.use((err, req, res, next) => {
     next(err);
 });
 
+// Global error handler para capturar fallos no manejados
+app.use((err, req, res, next) => {
+    console.error('Error de servidor:', err);
+    res.status(500);
+    if (req.accepts('html')) {
+        return res.render('error', {
+            title: 'Error interno',
+            message: 'Ocurrió un error interno en el servidor.',
+            error: app.get('env') === 'development' ? err : {}
+        });
+    }
+    if (req.accepts('json')) {
+        return res.json({ error: 'Ocurrió un error interno en el servidor.' });
+    }
+    res.type('txt').send('Ocurrió un error interno en el servidor.');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);

@@ -44,7 +44,7 @@ Imagen.getHomeImages = async (limite = 20) => {
 
         if (takeDestacadas > 0) {
             const [destacadas] = await db.execute(
-                `SELECT i.*, p.titulo, p.usuario_id, u.nombre as autor_nombre
+                `SELECT i.*, p.titulo, p.id as publicacion_id, p.usuario_id, u.nombre as autor_nombre
                  FROM imagen i
                  JOIN publicacion p ON i.publicacion_id = p.id
                  JOIN usuario u ON p.usuario_id = u.id
